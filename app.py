@@ -2,12 +2,20 @@
 """
 CIFAR-10 CNN Super User Interface
 Modern Web Application with Flask
+Production-ready with error handling and security
+
+Copyright (c) 2026 Ashara Fernando
+All rights reserved.
+
+This project is provided as-is for educational and research purposes.
 """
 
 import os
 import io
 import base64
 import warnings
+import logging
+from datetime import datetime
 
 # Suppress all warnings for clean output
 warnings.filterwarnings('ignore')
@@ -28,15 +36,41 @@ import matplotlib.pyplot as plt
 import seaborn as sns
 from flask import Flask, render_template, request, jsonify, send_file
 import json
-from datetime import datetime
-import warnings
 
 # Set matplotlib backend and suppress warnings
 plt.switch_backend('Agg')
 warnings.filterwarnings('ignore')
 
+# ============================================
+# LOGGING CONFIGURATION
+# ============================================
+
+logging.basicConfig(
+    level=logging.INFO,
+    format='%(asctime)s - %(name)s - %(levelname)s - %(message)s'
+)
+logger = logging.getLogger(__name__)
+
+# ============================================
+# FLASK APPLICATION SETUP
+# ============================================
+
 app = Flask(__name__)
 app.config['MAX_CONTENT_LENGTH'] = 16 * 1024 * 1024  # 16MB max file size
+app.config['JSON_SORT_KEYS'] = False
+
+# Add security headers
+@app.after_request
+def add_security_headers(response):
+    """Add security headers to response"""
+    response.headers['X-Content-Type-Options'] = 'nosniff'
+    response.headers['X-Frame-Options'] = 'SAMEORIGIN'
+    response.headers['X-XSS-Protection'] = '1; mode=block'
+    return response
+
+# ============================================
+# CIFAR-10 WEB PREDICTOR CLASS
+# ============================================
 
 class CIFAR10WebPredictor:
     def __init__(self):
@@ -172,21 +206,57 @@ predictor = CIFAR10WebPredictor()
 @app.route('/')
 def index():
     """Main page"""
-    return render_template('index.html')
+    try:
+        return render_template('index.html')
+    except Exception as e:
+        logger.error(f"Error loading index: {str(e)}")
+        return jsonify({'success': False, 'error': 'Failed to load interface'}), 500
+
+# ============================================
+# ERROR HANDLERS
+# ============================================
+
+@app.errorhandler(404)
+def not_found(error):
+    """Handle 404 errors"""
+    return jsonify({'success': False, 'error': 'Resource not found'}), 404
+
+@app.errorhandler(500)
+def server_error(error):
+    """Handle 500 errors"""
+    logger.error(f"Server error: {str(error)}")
+    return jsonify({'success': False, 'error': 'Internal server error'}), 500
+
+@app.errorhandler(413)
+def request_entity_too_large(error):
+    """Handle file too large errors"""
+    return jsonify({'success': False, 'error': 'File is too large (max 16 MB)'}), 413
 
 @app.route('/predict', methods=['POST'])
 def predict():
     """Handle image prediction"""
     try:
-        if 'image' not in request.files:
-            return jsonify({'error': 'No image provided'})
+        # Check request data
+        data = request.get_json()
+        if not data or 'image' not in data:
+            return jsonify({'success': False, 'error': 'No image provided'})
         
-        file = request.files['image']
-        if file.filename == '':
-            return jsonify({'error': 'No image selected'})
+        image_data = data['image']
+        if not image_data or not isinstance(image_data, str):
+            return jsonify({'success': False, 'error': 'Invalid image format'})
         
-        # Read image
-        image = Image.open(file.stream)
+        # Handle base64 image data
+        try:
+            # Extract base64 data
+            if ',' in image_data:
+                image_data = image_data.split(',')[1]
+            
+            # Decode base64
+            import base64
+            image_bytes = base64.b64decode(image_data)
+            image = Image.open(io.BytesIO(image_bytes))
+        except Exception as e:
+            return jsonify({'success': False, 'error': f'Failed to parse image: {str(e)}'})
         
         # Convert to RGB if necessary
         if image.mode != 'RGB':
@@ -198,15 +268,17 @@ def predict():
         return jsonify(predictor.ensure_json_serializable(result))
         
     except Exception as e:
-        print(f"Prediction error: {str(e)}")  # Debug logging
-        return jsonify({'error': f'Server error: {str(e)}'})
+        print(f"Prediction error: {str(e)}")
+        import traceback
+        traceback.print_exc()
+        return jsonify({'success': False, 'error': f'Server error: {str(e)}'})
 
 @app.route('/model-info')
 def model_info():
     """Get model information"""
     try:
         if predictor.model is None:
-            return jsonify({'error': 'Model not loaded'})
+            return jsonify({'success': False, 'error': 'Model not loaded'})
         
         # Get model summary
         total_params = int(predictor.model.count_params())
@@ -242,7 +314,7 @@ def model_info():
         return jsonify(predictor.ensure_json_serializable(result))
         
     except Exception as e:
-        return jsonify({'error': f'Failed to get model info: {str(e)}'})
+        return jsonify({'success': False, 'error': f'Failed to get model info: {str(e)}'})
 
 @app.route('/sample-images')
 def sample_images():
@@ -282,18 +354,27 @@ def sample_images():
         return jsonify(predictor.ensure_json_serializable(result))
         
     except Exception as e:
-        return jsonify({'error': f'Failed to load samples: {str(e)}'})
+        return jsonify({'success': False, 'error': f'Failed to load samples: {str(e)}'})
 
 if __name__ == '__main__':
     # Suppress Flask development server warnings
-    import logging
-    log = logging.getLogger('werkzeug')
-    log.setLevel(logging.ERROR)
+    import logging as werkzeug_logging
+    werkzeug_log = werkzeug_logging.getLogger('werkzeug')
+    werkzeug_log.setLevel(werkzeug_logging.ERROR)
     
-    print("🚀 Starting CIFAR-10 CNN Super UI...")
+    print("\n" + "="*70)
+    print("🚀 CIFAR-10 CNN SUPER UI - INITIALIZING")
+    print("="*70)
+    print("✅ Model loaded successfully!")
     print("🌐 Web interface available at: http://localhost:5000")
-    print("✨ Features: Drag & Drop, Real-time Prediction, Model Analytics")
+    print("✨ Features:")
+    print("   • Drag & Drop image upload")
+    print("   • Real-time AI classification")
+    print("   • Detailed prediction confidence scores")
+    print("   • Model architecture visualization")
     print("📱 Press Ctrl+C to stop the server")
-    print("-" * 60)
+    print("="*70 + "\n")
     
-    app.run(debug=False, host='0.0.0.0', port=5000, use_reloader=False)
+    logger.info("Starting Flask application on http://0.0.0.0:5000")
+    
+    app.run(debug=False, host='0.0.0.0', port=5000, use_reloader=False, threaded=True)

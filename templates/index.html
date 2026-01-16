@@ -1,0 +1,161 @@
+<!DOCTYPE html>
+<html lang="en">
+<!--
+CIFAR-10 CNN Classifier - Web Interface
+Copyright (c) 2026 Ashara Fernando
+All rights reserved.
+
+This project is provided as-is for educational and research purposes.
+-->
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <meta name="description" content="CIFAR-10 CNN Image Classifier - Advanced AI-powered classification system">
+    <meta name="theme-color" content="#667eea">
+    
+    <title>CIFAR-10 CNN Classifier - Advanced Image Recognition</title>
+    
+    <!-- External Fonts -->
+    <link rel="preconnect" href="https://fonts.googleapis.com" crossorigin>
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+    
+    <!-- Stylesheets -->
+    <link rel="stylesheet" href="{{ url_for('static', filename='css/style.css') }}">
+    
+    <!-- Favicon -->
+    <link rel="icon" href="data:image/svg+xml,<svg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 100 100'><text y='50' font-size='80' fill='%23667eea'>🤖</text></svg>">
+</head>
+<body>
+    <div class="page-wrapper">
+        <!-- HEADER -->
+        <header>
+            <div class="container">
+                <div class="header-content">
+                    <a href="/" class="logo">
+                        <span>🤖</span>
+                        <span>CIFAR-10 Classifier</span>
+                    </a>
+                    <nav>
+                        <ul class="nav-links">
+                            <li><a href="#upload">Upload</a></li>
+                            <li><a href="#results">Results</a></li>
+                            <li><a href="#stats">Stats</a></li>
+                        </ul>
+                    </nav>
+                </div>
+            </div>
+        </header>
+
+        <!-- MAIN CONTENT -->
+        <div class="content">
+            <div class="container">
+                <div class="main-card">
+                    <!-- Card Header -->
+                    <div class="card-header">
+                        <h1 class="card-title">CIFAR-10 CNN Classifier</h1>
+                        <p class="card-subtitle">Advanced AI-Powered Image Classification</p>
+                    </div>
+
+                    <!-- Upload Section -->
+                    <div class="upload-container" id="upload">
+                        <div class="upload-area" id="uploadArea" role="button" aria-label="Click or drag image to upload">
+                            <div class="upload-icon">📸</div>
+                            <div class="upload-text">Drag & drop your image here</div>
+                            <div class="upload-subtext">or click to browse (JPEG, PNG, GIF, WebP - Max 16 MB)</div>
+                            <input type="file" id="fileInput" accept="image/jpeg,image/png,image/gif,image/webp" aria-hidden="true">
+                        </div>
+                    </div>
+
+                    <!-- Preview Section -->
+                    <div class="preview-container" id="previewContainer">
+                        <div class="preview-wrapper">
+                            <img id="previewImg" class="preview-img" alt="Image preview">
+                        </div>
+                    </div>
+
+                    <!-- Loading Spinner -->
+                    <div class="loading" id="loading">
+                        <div class="spinner"></div>
+                        <p class="loading-text">🔍 Analyzing your image...</p>
+                    </div>
+
+                    <!-- Error Message -->
+                    <div class="error-message" id="errorMessage" role="alert"></div>
+
+                    <!-- Prediction Results Section -->
+                    <div class="prediction-section" id="predictionSection">
+                        <div class="prediction-result">
+                            <div class="prediction-label">🎯 Classification Result</div>
+                            <div class="prediction-class">
+                                <span id="predictionEmoji" class="class-emoji">🤔</span>
+                                <span id="predictionClass">Loading...</span>
+                            </div>
+                            <div class="confidence-container">
+                                <div class="confidence-label">Confidence Level</div>
+                                <div class="confidence-percentage">
+                                    <span id="confidenceValue">0</span>%
+                                </div>
+                                <div class="confidence-bar">
+                                    <div class="confidence-fill" id="confidenceFill"></div>
+                                </div>
+                            </div>
+                        </div>
+
+                        <!-- All Predictions Table -->
+                        <div class="all-predictions" id="results">
+                            <div class="predictions-header">📊 All Classification Results</div>
+                            <div id="allPredictions"></div>
+                        </div>
+
+                        <!-- Action Buttons -->
+                        <div class="button-group" id="buttonGroup">
+                            <button class="btn-secondary btn-small" onclick="clearImage()">
+                                <span>🔄</span> Clear
+                            </button>
+                            <button class="btn-secondary btn-small" onclick="uploadAnother()">
+                                <span>📤</span> Another Image
+                            </button>
+                        </div>
+                    </div>
+
+                    <!-- Statistics Section -->
+                    <div id="stats">
+                        <div class="stats-grid" id="modelStats">
+                            <!-- Loaded dynamically -->
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+
+        <!-- FOOTER -->
+        <footer>
+            <div class="container">
+                <div class="footer-content">
+                    <p>🚀 CIFAR-10 CNN Classifier | Advanced Deep Learning Model</p>
+                    <p>© 2026 Ashara Fernando | All rights reserved</p>
+                    <p style="font-size: 0.85em; color: #999;">Powered by TensorFlow, Keras & Flask</p>
+                    <div class="footer-links">
+                        <a href="https://github.com/AsharaFernando18/cnn-image-classifier" target="_blank" rel="noopener">GitHub</a>
+                        <a href="#" target="_blank" rel="noopener">Documentation</a>
+                        <a href="#" target="_blank" rel="noopener">About</a>
+                    </div>
+                </div>
+            </div>
+        </footer>
+    </div>
+
+    <!-- Scripts -->
+    <script src="{{ url_for('static', filename='js/app.js') }}"></script>
+    
+    <!-- Additional enhancements -->
+    <script>
+        // Service Worker registration for offline support (optional)
+        if ('serviceWorker' in navigator) {
+            navigator.serviceWorker.register('/sw.js').catch(err => {
+                console.log('Service Worker registration failed:', err);
+            });
+        }
+    </script>
+</body>
+</html>

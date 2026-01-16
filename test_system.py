@@ -1,6 +1,11 @@
 #!/usr/bin/env python3
 """
 Quick System Test - Enhanced CIFAR-10 CNN
+
+Copyright (c) 2026 Ashara Fernando
+All rights reserved.
+
+This project is provided as-is for educational and research purposes.
 """
 
 def test_system():

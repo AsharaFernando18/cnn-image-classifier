@@ -1,7 +1,11 @@
 #!/usr/bin/env python3
 """
-Enhanced CIFAR-10 CNN Implementation 
+Enhanced CIFAR-10 CNN Implementation
 
+Copyright (c) 2026 Ashara Fernando
+All rights reserved.
+
+This project is provided as-is for educational and research purposes.
 """
 
 import os

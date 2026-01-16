@@ -1,3 +1,13 @@
+"""
+ResNet50 Model for CIFAR-10 Classification
+Advanced transfer learning implementation
+
+Copyright (c) 2026 Ashara Fernando
+All rights reserved.
+
+This project is provided as-is for educational and research purposes.
+"""
+
 import tensorflow as tf
 from tensorflow.keras.applications import ResNet50
 from tensorflow.keras.preprocessing.image import ImageDataGenerator

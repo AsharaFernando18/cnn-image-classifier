@@ -2,6 +2,11 @@
 """
 Quick Model Retraining Script - Fast Version
 Simplified training for quick model updates
+
+Copyright (c) 2026 Ashara Fernando
+All rights reserved.
+
+This project is provided as-is for educational and research purposes.
 """
 
 import os
